@@ -39,7 +39,7 @@ export const registerUser = async (req, res) => {
   }
 };
 
-// Controlador de login
+// Controlador de logi
 export const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
