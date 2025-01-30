@@ -1,20 +1,30 @@
-import mongoose from 'mongoose'
-import bcrypt from 'bcrypt'
+import mongoose from 'mongoose';
+import bcrypt from 'bcrypt';
 
-const userSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: [true, 'O nome é obrigatório']
+const userSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: [true, 'O nome é obrigatório'],
+    },
+    email: {
+      type: String,
+      required: [true, 'O e-mail é obrigatório'],
+      unique: true,
+      lowercase: true,
+    },
+    password: {
+      type: String,
+      required: [true, 'A senha é obrigatória'],
+    },
+    role: {
+      type: String,
+      enum: ['user', 'master'],
+      default: 'user',
+    },
   },
-  email: {
-    type: String,
-    required: [true, 'O e-mail é obrigatório']
-  },
-  password: {
-    type: String,
-    required: [true, 'A senha é obrigatória']
-  }
-}, {timestamps: true})
+  { timestamps: true }
+);
 
 // Antes de salvar, hash da senha
 userSchema.pre('save', async function (next) {
@@ -28,4 +38,10 @@ userSchema.pre('save', async function (next) {
 userSchema.methods.matchPassword = async function (password) {
   return await bcrypt.compare(password, this.password);
 };
-export default mongoose.model('User', userSchema)
+
+// Método para verificar se o usuário é master
+userSchema.methods.isMaster = function () {
+  return this.role === 'master';
+};
+
+export default mongoose.model('User', userSchema);

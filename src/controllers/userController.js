@@ -2,13 +2,13 @@ import User from '../models/userModel.js'
 import jwt from 'jsonwebtoken';
 
 // Função para gerar o token JWT
-const generateToken = (id, name, email) => {
-  return jwt.sign({ id, name, email }, process.env.JWT_SECRET, { expiresIn: '7d' });
+const generateToken = (id, name, email, role) => {
+  return jwt.sign({ id, name, email, role }, process.env.JWT_SECRET, { expiresIn: '7d' });
 };
 
 // Controlador para registro de usuários
 export const registerUser = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, role } = req.body;
 
   if (!name || !email || !password) {
     return res.status(400).json({ message: 'Por favor, preencha todos os campos' });
@@ -22,14 +22,15 @@ export const registerUser = async (req, res) => {
     }
 
     // Criar um novo usuário
-    const newUser = await User.create({ name, email, password });
+    const newUser = await User.create({ name, email, password, role: role || 'user' });
 
     if (newUser) {
       res.status(201).json({
         _id: newUser.id,
         name: newUser.name,
         email: newUser.email,
-        token: generateToken(newUser.id),
+        role: newUser.role,
+        token: generateToken(newUser.id, newUser.name, newUser.email, newUser.role),
       });
     } else {
       res.status(400).json({ message: 'Erro ao registrar usuário' });
@@ -56,7 +57,8 @@ export const loginUser = async (req, res) => {
         _id: user.id,
         name: user.name,
         email: user.email,
-        token: generateToken(user.id, user.name, user.email),
+        role: user.role,
+        token: generateToken(user.id, user.name, user.email, user.role),
       });
     } else {
       res.status(401).json({ message: 'Credenciais inválidas' });
@@ -77,6 +79,7 @@ export const getUserProfile = async (req, res) => {
         _id: user.id,
         name: user.name,
         email: user.email,
+        role: user.role,
       });
     } else {
       res.status(404).json({ message: 'Usuário não encontrado' });
