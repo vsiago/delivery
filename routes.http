@@ -61,7 +61,6 @@ Content-Type: application/json
   "password": "81510156"
 }
 
-
 ### Login via LDAP
 
 POST http://localhost:3333/api/users/login
@@ -71,7 +70,6 @@ Content-Type: application/json
   "data": "iago.vieira",
   "password": "Ai17003131!"
 }
-
 
 ### FAZER LOGIN COM USUÁRIO TESTE APP
 

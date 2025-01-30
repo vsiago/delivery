@@ -163,7 +163,7 @@ export const loginUser = async (req, res) => {
           username: user.sAMAccountName,
           email: user.mail,
           name: user.cn,
-          role: user.role,
+          role: user.memberOf,
           allowedApps: user.allowedApps,
           token: generateToken(user.id, user.username),  // Função para gerar o token
         },
