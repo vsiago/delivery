@@ -19,7 +19,7 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ['user', 'master', 'member'], // Adicionando 'member' como valor válido
+      enum: ['user', 'master', 'tecnico'], // Adicionando 'member' como valor válido
       default: 'user',
     },
   },

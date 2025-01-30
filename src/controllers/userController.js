@@ -130,6 +130,7 @@ export const loginUser = async (req, res) => {
     } catch (error) {
       return res.status(500).json({ message: 'Erro no servidor', error: error.message });
     }
+
   } else if (data.includes('.')) {
     // Login via LDAP
     const username = data;
@@ -144,30 +145,57 @@ export const loginUser = async (req, res) => {
     req.body.username = username;
     req.body.password = password;
 
-    passport.authenticate("ldapauth", { session: false }, (err, user, info) => {
+    passport.authenticate("ldapauth", { session: false }, async (err, ldapUser, info) => {
       if (err) {
         console.error("Erro no LDAP:", err);
         return res.status(500).json({ error: "Erro interno no servidor" });
       }
 
-      if (!user) {
+      if (!ldapUser) {
         console.warn("Autenticação falhou:", info);
         return res.status(401).json({ error: "Usuário ou senha inválidos" });
       }
 
-      // Se o usuário for autenticado, retornar uma resposta de sucesso
-      res.json({
-        message: "Login bem-sucedido",
-        user: {
-          id: user.id,
-          username: user.sAMAccountName,
-          email: user.mail,
-          name: user.cn,
-          role: user.memberOf,
-          allowedApps: user.allowedApps,
-          token: generateToken(user.id, user.username),  // Função para gerar o token
-        },
-      });
+      try {
+        // Extrair dados do LDAP
+        const username = ldapUser.sAMAccountName;
+        const name = ldapUser.givenName || ldapUser.cn;
+        const email = ldapUser.mail || `${username}@itaguai.rj.gov.br`;
+
+        // Atribuir o papel (role) com base nos grupos do LDAP
+        const role = Array.isArray(ldapUser.memberOf) && ldapUser.memberOf.length > 0
+          ? ldapUser.memberOf[0]  // Pega o primeiro grupo
+          : "member"; // Caso contrário, define como "member" por padrão
+
+        // Caso o usuário ainda não esteja no banco de dados, cria um novo
+        let user = await User.findOne({ email });
+
+        if (!user) {
+          user = new User({
+            username,
+            name,
+            email,
+            password,  // Não aplicamos role aqui, pois ele vem do LDAP
+          });
+          await user.save();
+        }
+
+        // Gerar o token JWT
+        const token = generateToken(user.id, user.name, user.email, role);
+
+        // Retornar os dados para o frontend
+        return res.json({
+          _id: user.id,
+          username,
+          name,
+          email,
+          role,
+          token,
+        });
+      } catch (error) {
+        console.error("Erro ao processar o LDAP:", error);
+        return res.status(500).json({ error: "Erro ao salvar ou autenticar o usuário", message: error.message });
+      }
     })(req, res);
 
   } else {
