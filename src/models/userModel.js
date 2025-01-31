@@ -19,9 +19,10 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ['user', 'master', 'tecnico'], // Adicionando 'member' como valor válido
+      enum: ['master', 'user', 'member', 'tecnico'],
       default: 'user',
     },
+    apps: [{ type: mongoose.Schema.Types.ObjectId, ref: "App" }]
   },
   { timestamps: true }
 );

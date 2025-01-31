@@ -2,6 +2,7 @@ import express from 'express'
 import dotenv from 'dotenv'
 import cors from 'cors'
 import userRoutes from './routes/userRoutes.js'
+import appsRoutes from './routes/appsRoutes.js'
 import { connectDB } from './config/db.js'
 import passport from 'passport'
 import LdapStrategy from 'passport-ldapauth'
@@ -17,6 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Rotas
 app.use('/api/users', userRoutes)
+app.use('/api/apps', appsRoutes)
 
 
 const PORT = process.env.PORT || 5000

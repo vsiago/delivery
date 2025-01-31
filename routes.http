@@ -61,12 +61,40 @@ Content-Type: application/json
   "password": "Ai17003131!"
 }
 
-### FAZER LOGIN COM USUÁRIO TESTE APP
+### Cadastrar App por tipo de usuário
 
-POST http://localhost:3333/login
+POST http://localhost:3333/api/apps/
 Content-Type: application/json
 
 {
-  "data": "iago.vieira",
-  "password": "Ai17003131!"
+  "apps": [
+    {
+      "name": "Oportunidades",
+      "description": "Aplicativo para visualizar e gerenciar oportunidades de vendas.",
+      "logo": "https://example.com/logos/oportunidades.png",
+      "url": "https://example.com/oportunidades",
+      "status": "ativo"
+    }
+  ]
+}
+
+
+### Login via LDAP
+
+POST http://localhost:3333/api/users/login
+Content-Type: application/json
+
+{
+  "data": "wallace.moreira",
+  "password": "Aleijado1234"
+}
+
+### Login via LDAP
+
+POST http://localhost:3333/api/users/login
+Content-Type: application/json
+
+{
+  "data": "ronyson.fonseca",
+  "password": "Th&sims123"
 }

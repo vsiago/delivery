@@ -1,8 +1,11 @@
 import User from '../models/userModel.js'
+import App from '../models/appSchema.js'
+import getAppsByRole from '../utils/getAppsByRole.js';
 import jwt from 'jsonwebtoken';
 import passport from 'passport'
 import LdapStrategy from 'passport-ldapauth'
 import dotenv from 'dotenv'
+import bcrypt from 'bcrypt'
 
 dotenv.config()
 
@@ -99,13 +102,14 @@ const getUserRole = (userGroups) => {
   return roles.length > 0 ? roles : ["user"];
 };
 
+
+
 // Controlador de login
 export const loginUser = async (req, res) => {
   const { data, password } = req.body;
 
   // Verifica se o dado contém um '@', indicando um login por e-mail
   if (data.includes('@')) {
-    // Login por e-mail
     const email = data;
 
     if (!email || !password) {
@@ -113,15 +117,19 @@ export const loginUser = async (req, res) => {
     }
 
     try {
-      // Encontrar o usuário pelo e-mail
-      const user = await User.findOne({ email });
+      // Encontrar o usuário
+      let user = await User.findOne({ email });
 
       if (user && (await user.matchPassword(password))) {
+        // Obter os aplicativos com base no role do usuário
+        const apps = await getAppsByRole(user.role);
+
         return res.status(200).json({
           _id: user.id,
           name: user.name,
           email: user.email,
           role: user.role,
+          apps, // Enviando os apps com base no tipo de usuário
           token: generateToken(user.id, user.name, user.email, user.role),
         });
       } else {
@@ -134,9 +142,7 @@ export const loginUser = async (req, res) => {
   } else if (data.includes('.')) {
     // Login via LDAP
     const username = data;
-    const password = req.body.password;
 
-    // Garantir que o username e password estejam presentes
     if (!username || !password) {
       return res.status(400).json({ error: "Usuário e senha são obrigatórios" });
     }
@@ -145,6 +151,7 @@ export const loginUser = async (req, res) => {
     req.body.username = username;
     req.body.password = password;
 
+    // Autenticação LDAP com Passport.js
     passport.authenticate("ldapauth", { session: false }, async (err, ldapUser, info) => {
       if (err) {
         console.error("Erro no LDAP:", err);
@@ -160,36 +167,50 @@ export const loginUser = async (req, res) => {
         // Extrair dados do LDAP
         const username = ldapUser.sAMAccountName;
         const name = ldapUser.givenName || ldapUser.cn;
-        const email = ldapUser.mail || `${username}@itaguai.rj.gov.br`;
+        const email = ldapUser.mail;
 
-        // Atribuir o papel (role) com base nos grupos do LDAP
-        const role = Array.isArray(ldapUser.memberOf) && ldapUser.memberOf.length > 0
-          ? ldapUser.memberOf[0]  // Pega o primeiro grupo
-          : "member"; // Caso contrário, define como "member" por padrão
+        // Mapear role do LDAP para um valor aceitável
+        const ldapRole = Array.isArray(ldapUser.memberOf) && ldapUser.memberOf.length > 0
+          ? ldapUser.memberOf[0]
+          : "member"; // Substitua pelo valor correto que sua aplicação espera
 
-        // Caso o usuário ainda não esteja no banco de dados, cria um novo
+        // Definir role com base no LDAP ou outros critérios
+        let role = 'member'; // Ajuste conforme a lógica de mapeamento de roles
+        if (ldapRole.includes('STI')) {
+          role = 'tecnico'; // Exemplo de mapeamento
+        }
+
+        // Verificar se o usuário já existe
         let user = await User.findOne({ email });
 
+        // Se o usuário não existe, cria o novo usuário com a senha fornecida
         if (!user) {
+          // Criptografar a senha do usuário
+          const hashedPassword = await bcrypt.hash(password, 10);  // Usando a senha fornecida
+
           user = new User({
             username,
             name,
             email,
-            password,  // Não aplicamos role aqui, pois ele vem do LDAP
+            role,
+            password: hashedPassword,  // Salvando a senha criptografada
           });
           await user.save();
         }
 
-        // Gerar o token JWT
+        // Obter os aplicativos com base no role do usuário
+        const apps = await getAppsByRole(role);
+
+        // Gerar token JWT
         const token = generateToken(user.id, user.name, user.email, role);
 
-        // Retornar os dados para o frontend
+        // Retornar os dados do usuário junto com os aplicativos
         return res.json({
           _id: user.id,
-          username,
           name,
           email,
           role,
+          apps, // Retorna os aplicativos que ele pode acessar
           token,
         });
       } catch (error) {
@@ -202,6 +223,7 @@ export const loginUser = async (req, res) => {
     return res.status(400).json({ message: 'Formato de login inválido' });
   }
 };
+
 
 
 // Controlador para obter detalhes do usuário autenticado
