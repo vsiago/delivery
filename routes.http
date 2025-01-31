@@ -69,8 +69,8 @@ Content-Type: application/json
 {
   "apps": [
     {
-      "name": "Oportunidades",
-      "description": "Aplicativo para visualizar e gerenciar oportunidades de vendas.",
+      "name": "IPTU",
+      "description": "Aplicativo IPTU.",
       "logo": "https://example.com/logos/oportunidades.png",
       "url": "https://example.com/oportunidades",
       "status": "ativo"
