@@ -14,7 +14,7 @@ const app = express()
 app.use(express.json())
 app.use(passport.initialize());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors({ origin: "https://08b6-45-169-84-2.ngrok-free.app" }));
+app.use(cors());
 
 
 // Rotas
