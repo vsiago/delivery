@@ -21,6 +21,10 @@ app.use(cors({ origin: "https://08b6-45-169-84-2.ngrok-free.app" }));
 app.use('/api/users', userRoutes)
 app.use('/api/apps', appsRoutes)
 
+app.get('/', (req, res) => {
+    res.send('Hello from Vercel!');
+});
+
 
 const PORT = process.env.PORT || 5000
 connectDB()
