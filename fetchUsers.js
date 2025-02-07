@@ -14,9 +14,12 @@ client.bind(process.env.LDAP_BIND_DN, process.env.LDAP_BIND_CREDENTIALS, (err) =
     }
 
     const opts = {
-        filter: '(objectClass=user)', // Filtro para buscar todos os objetos do tipo usuário
+        filter: '(objectClass=user)', // Filtro para buscar usuários
         scope: 'sub',
         attributes: ['cn', 'sAMAccountName', 'mail', 'memberOf'], // Atributos desejados
+        paged: {
+            pageSize: 5000, // Reduzido para evitar limitações do servidor
+        },
     };
 
     client.search(process.env.LDAP_SEARCH_BASE, opts, (err, res) => {
@@ -32,6 +35,7 @@ client.bind(process.env.LDAP_BIND_DN, process.env.LDAP_BIND_CREDENTIALS, (err) =
         });
 
         res.on('end', (result) => {
+            console.log('Busca finalizada. Código:', result.status);
             console.log('Usuários encontrados:', users);
             client.unbind();
         });

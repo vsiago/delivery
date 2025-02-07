@@ -3,7 +3,7 @@ import App from "../models/appSchema.js";
 const getAppsByRole = async (role) => {
     const appsPorTipo = {
         user: ["Oportunidades", "IPTU"],
-        member: ["Chamados", "Oportunidades", "ItaMail", "ItaCloud", "ItaDesk"],
+        member: ["Chamados", "IPTU", "Oportunidades", "ItaMail", "ItaCloud", "ItaDesk"],
         tecnico: ["ChamadosTecnicos", "OportunidadesTecnico", "ItaMail", "ItaCloud"],
         master: [
             "Chamados",
@@ -12,7 +12,8 @@ const getAppsByRole = async (role) => {
             "OportunidadesTecnico",
             "ItaMail",
             "ItaCloud",
-            "ItaDesk"
+            "ItaDesk",
+            "IPTU"
         ]
     };
 

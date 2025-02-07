@@ -16,7 +16,7 @@ POST http://localhost:3333/api/users/login
 Content-Type: application/json
 
 {
-  "email": "vsiago23@gmail.com",
+  "data": "vsiago23@gmail.com",
   "password": "81510156"
 }
 
@@ -61,23 +61,6 @@ Content-Type: application/json
   "password": "Ai17003131!"
 }
 
-### Cadastrar App por tipo de usuário
-
-POST http://localhost:3333/api/apps/
-Content-Type: application/json
-
-{
-  "apps": [
-    {
-      "name": "IPTU",
-      "description": "Aplicativo IPTU.",
-      "logo": "https://example.com/logos/oportunidades.png",
-      "url": "https://example.com/oportunidades",
-      "status": "ativo"
-    }
-  ]
-}
-
 
 ### Login via LDAP
 
@@ -97,4 +80,43 @@ Content-Type: application/json
 {
   "data": "ronyson.fonseca",
   "password": "Th&sims123"
+}
+
+
+
+############## A P P S #################
+
+
+### Cadastrar App para o member
+
+POST http://localhost:3333/api/apps/
+Content-Type: application/json
+
+{
+  "apps": [
+    {
+      "name": "IPTU",
+      "description": "Aplicativo IPTU.",
+      "logo": "https://example.com/logos/oportunidades.png",
+      "url": "https://example.com/oportunidades",
+      "status": "ativo"
+    }
+  ]
+}
+
+### Cadastrar App para o tecnico
+
+POST http://localhost:3333/api/apps/
+Content-Type: application/json
+
+{
+  "apps": [
+    {
+      "name": "ChamadosTecnicos",
+      "description": "Aplicativo ChamadosTecnicos.",
+      "logo": "https://example.com/logos/oportunidades.png",
+      "url": "https://example.com/oportunidades",
+      "status": "ativo"
+    }
+  ]
 }
