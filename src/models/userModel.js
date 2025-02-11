@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 
 const userSchema = new mongoose.Schema(
   {
+    username: { type: String, required: false, unique: true },
     name: {
       type: String,
       required: [true, 'O nome é obrigatório'],
@@ -14,14 +15,14 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: [true, 'A senha é obrigatória'],
+      select: false
     },
     role: {
       type: String,
       enum: ['master', 'user', 'member', 'tecnico'],
       default: 'user',
     },
-    apps: [{ type: mongoose.Schema.Types.ObjectId, ref: "App" }]
+    apps: [{ type: String }] // ✅ Agora aceita strings
   },
   { timestamps: true }
 );

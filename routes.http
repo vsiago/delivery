@@ -41,16 +41,6 @@ Content-Type: application/json
   "password": "132456"
 }
 
-### FAZER LOGIN COM USUÁRIO MASTER
-
-POST http://localhost:3333/api/users/login
-Content-Type: application/json
-
-{
-  "data": "vsiago23@gmail.com",
-  "password": "81510156"
-}
-
 ### Login via LDAP
 
 POST http://localhost:3333/api/users/login
@@ -82,13 +72,9 @@ Content-Type: application/json
   "password": "Th&sims123"
 }
 
-
-
 ############## A P P S #################
 
-
 ### Cadastrar App para o member
-
 POST http://localhost:3333/api/apps/
 Content-Type: application/json
 
@@ -105,7 +91,6 @@ Content-Type: application/json
 }
 
 ### Cadastrar App para o tecnico
-
 POST http://localhost:3333/api/apps/
 Content-Type: application/json
 
@@ -120,3 +105,59 @@ Content-Type: application/json
     }
   ]
 }
+
+### Cadastrar um App
+POST http://localhost:3333/api/apps/
+Content-Type: application/json
+
+{
+  "apps": [
+    {
+      "name": "Chamados Agro",
+      "description": "Aplicativo Painel Saúde.",
+      "logo": "https://example.com/logos/oportunidades.png",
+      "url": "https://example.com/oportunidades",
+      "status": "ativo"
+    }
+  ]
+}
+
+
+############## D E F I N I R  A P P S  P A R A  U S U Á R I O S #################
+
+### Definir aplicativos para um usuário do LDAP manualmente
+POST http://localhost:3333/api/users/definir-apps
+Content-Type: application/json
+
+{
+  "username": "iago.vieira",
+  "apps": ["Chamados Agro"]
+}
+
+### Remover um app atribuido para um perfil LDAP
+POST http://localhost:3333/api/users/remover-app
+Content-Type: application/json
+
+{
+  "username": "iago.vieira",
+  "apps": ["Chamados Assistência Social"]
+}
+
+
+### Definir aplicativos para um usuário do LDAP (tecnico)
+POST http://localhost:3333/api/users/definir-apps
+Content-Type: application/json
+
+{
+  "username": "iago.vieira",
+  "apps": ["ChamadosTecnicos"]
+}
+
+
+### Buscar informações de um usuário
+GET http://localhost:3333/api/users/iago.vieira
+Content-Type: application/json
+
+### Buscar todos os usuários
+GET http://localhost:3333/api/users
+Content-Type: application/json

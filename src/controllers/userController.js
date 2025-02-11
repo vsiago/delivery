@@ -1,4 +1,5 @@
 import User from '../models/userModel.js'
+import UserApps from "../models/UserApps.js";
 import App from '../models/appSchema.js'
 import getAppsByRole from '../utils/getAppsByRole.js';
 import jwt from 'jsonwebtoken';
@@ -62,22 +63,21 @@ const appsByGroup = {
 };
 
 // Função para obter aplicativos permitidos com base nos grupos do usuário
-const getUserApps = (userGroups) => {
-  let allowedApps = new Set();
+const getUserApps = async (user) => {
+  // Buscar apps padrão baseado no papel do usuário
+  const defaultApps = await getAppsByRole(user.role);
 
-  userGroups.forEach((group) => {
-    const groupName = group.split(",")[0].replace("CN=", ""); // Extrai o nome do grupo LDAP
+  // Buscar os apps que foram atribuídos manualmente ao usuário
+  const userApps = user.apps || [];
+  const manualApps = await App.find({ name: { $in: userApps } });
 
-    if (groupName in appsByGroup) {
-      if (appsByGroup[groupName] === "ALL") {
-        allowedApps = new Set(Object.values(appsByGroup).flat()); // Se for Master, vê tudo
-      } else {
-        appsByGroup[groupName].forEach((app) => allowedApps.add(app));
-      }
-    }
-  });
+  // Combinar ambos, garantindo que não haja duplicatas
+  const allApps = [...defaultApps, ...manualApps].filter(
+    (app, index, self) =>
+      index === self.findIndex((a) => a.name === app.name) // Remover duplicatas
+  );
 
-  return Array.from(allowedApps);
+  return allApps;
 };
 
 // Função para mapear grupos LDAP para roles
@@ -108,121 +108,114 @@ const getUserRole = (userGroups) => {
 export const loginUser = async (req, res) => {
   const { data, password } = req.body;
 
-  // Verifica se o dado contém um '@', indicando um login por e-mail
-  if (data.includes('@')) {
-    const email = data;
+  if (!data || !password) {
+    return res.status(400).json({ message: 'Por favor, preencha todos os campos' });
+  }
 
-    if (!email || !password) {
-      return res.status(400).json({ message: 'Por favor, preencha todos os campos' });
-    }
-
-    try {
-      // Encontrar o usuário
+  try {
+    if (data.includes('@')) {
+      // Login via email (usuários não LDAP)
+      const email = data;
       let user = await User.findOne({ email });
 
       if (user && (await user.matchPassword(password))) {
-        // Obter os aplicativos com base no role do usuário
         const apps = await getAppsByRole(user.role);
-
         return res.status(200).json({
           _id: user.id,
           name: user.name,
           email: user.email,
           role: user.role,
-          apps, // Enviando os apps com base no tipo de usuário
+          apps,
           token: generateToken(user.id, user.name, user.email, user.role),
         });
       } else {
         return res.status(401).json({ message: 'Credenciais inválidas' });
       }
-    } catch (error) {
-      return res.status(500).json({ message: 'Erro no servidor', error: error.message });
-    }
+    } else if (data.includes('.')) {
 
-  } else if (data.includes('.')) {
-    // Login via LDAP
-    const username = data;
 
-    if (!username || !password) {
-      return res.status(400).json({ error: "Usuário e senha são obrigatórios" });
-    }
+      // Login via LDAP
+      const username = data;
+      req.body.username = username;
+      req.body.password = password;
 
-    // Passando username e password manualmente para req.body
-    req.body.username = username;
-    req.body.password = password;
-
-    // Autenticação LDAP com Passport.js
-    passport.authenticate("ldapauth", { session: false }, async (err, ldapUser, info) => {
-      if (err) {
-        console.error("Erro no LDAP:", err);
-        return res.status(500).json({ error: "Erro interno no servidor" });
-      }
-
-      if (!ldapUser) {
-        console.warn("Autenticação falhou:", info);
-        return res.status(401).json({ error: "Usuário ou senha inválidos" });
-      }
-
-      try {
-        // Extrair dados do LDAP
-        const username = ldapUser.sAMAccountName;
-        const name = ldapUser.givenName || ldapUser.cn;
-        const email = ldapUser.mail;
-
-        // Mapear role do LDAP para um valor aceitável
-        const ldapRole = Array.isArray(ldapUser.memberOf) && ldapUser.memberOf.length > 0
-          ? ldapUser.memberOf[0]
-          : "member"; // Substitua pelo valor correto que sua aplicação espera
-
-        // Definir role com base no LDAP ou outros critérios
-        let role = 'member'; // Ajuste conforme a lógica de mapeamento de roles
-        if (ldapRole.includes('STI')) {
-          role = 'tecnico'; // Exemplo de mapeamento
+      passport.authenticate("ldapauth", { session: false }, async (err, ldapUser, info) => {
+        if (err) {
+          console.error("Erro no LDAP:", err);
+          return res.status(500).json({ error: "Erro interno no servidor" });
         }
 
-        // Verificar se o usuário já existe
-        let user = await User.findOne({ email });
+        if (!ldapUser) {
+          console.warn("Autenticação falhou:", info);
+          return res.status(401).json({ error: "Usuário ou senha inválidos" });
+        }
 
-        // Se o usuário não existe, cria o novo usuário com a senha fornecida
-        if (!user) {
-          // Criptografar a senha do usuário
-          const hashedPassword = await bcrypt.hash(password, 10);  // Usando a senha fornecida
+        try {
+          const username = ldapUser.sAMAccountName;
+          const name = ldapUser.givenName || ldapUser.cn;
+          const email = ldapUser.mail;
+          const dn = ldapUser.dn;
+          const memberOf = ldapUser.memberOf;
 
-          user = new User({
-            username,
-            name,
-            email,
-            role,
-            password: hashedPassword,  // Salvando a senha criptografada
+          // Determinar o papel do usuário
+          let role = 'member';
+          if (Array.isArray(memberOf) && memberOf.some(group => group.includes('STI'))) {
+            role = 'tecnico';
+          }
+
+          // Buscar usuário no banco
+          let user = await User.findOne({ $or: [{ email }, { username }] });
+
+          if (!user) {
+            // Criar usuário se não existir
+            user = new User({ username, name, email, role, dn, memberOf });
+            await user.save();
+          } else {
+            // Comparar e atualizar se necessário (INCLUINDO USERNAME)
+            if (
+              user.username !== username ||  // Verifica se o username está salvo
+              user.name !== name ||
+              user.email !== email ||
+              user.role !== role ||
+              user.dn !== dn ||
+              JSON.stringify(user.memberOf) !== JSON.stringify(memberOf)
+            ) {
+              await User.updateOne({ _id: user.id }, { username, name, email, role, dn, memberOf });
+            }
+          }
+
+
+          const token = generateToken(user.id, user.name, user.email, role);
+
+          // Buscar apps associados ao usuário (padrões + adicionados manualmente)
+          const apps = await getUserApps(user);
+
+          return res.json({
+            user: {
+              _id: user.id,
+              username: user.username,
+              name: user.name,
+              email: user.email,
+              role: user.role,
+              apps, // Apps dentro de "user"
+              createdAt: user.createdAt,
+              updatedAt: user.updatedAt,
+            },
+            token // Agora o token é irmão de "user"
           });
-          await user.save();
+        } catch (error) {
+          console.error("Erro ao processar o LDAP:", error);
+          return res.status(500).json({ error: "Erro ao salvar ou autenticar o usuário", message: error.message });
         }
-
-        // Obter os aplicativos com base no role do usuário
-        const apps = await getAppsByRole(role);
-
-        // Gerar token JWT
-        const token = generateToken(user.id, user.name, user.email, role);
-
-        // Retornar os dados do usuário junto com os aplicativos
-        return res.json({
-          _id: user.id,
-          name,
-          email,
-          role,
-          apps, // Retorna os aplicativos que ele pode acessar
-          token,
-        });
-      } catch (error) {
-        console.error("Erro ao processar o LDAP:", error);
-        return res.status(500).json({ error: "Erro ao salvar ou autenticar o usuário", message: error.message });
-      }
-    })(req, res);
-
-  } else {
-    return res.status(400).json({ message: 'Formato de login inválido' });
+      })(req, res);
+    } else {
+      return res.status(400).json({ message: 'Formato de login inválido' });
+    }
+  } catch (error) {
+    return res.status(500).json({ message: 'Erro no servidor', error: error.message });
   }
 };
+
 
 
 
@@ -243,5 +236,77 @@ export const getUserProfile = async (req, res) => {
     }
   } catch (error) {
     res.status(500).json({ message: 'Erro no servidor', error: error.message });
+  }
+};
+
+
+/**
+ * Define quais aplicativos um usuário do LDAP pode acessar.
+ */
+export const definirAppsParaUsuario = async (req, res) => {
+  const { username, apps } = req.body;
+
+  try {
+    const user = await User.findOneAndUpdate(
+      { username },
+      { $addToSet: { apps: { $each: apps } } }, // Adiciona sem duplicar
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ message: "Usuário não encontrado" });
+    }
+
+    res.json({ message: "Apps atribuídos com sucesso", user });
+  } catch (error) {
+    console.error("Erro ao definir apps:", error);
+    res.status(500).json({ message: "Erro interno no servidor" });
+  }
+};
+
+export const removerApp = async (req, res) => {
+  const { username, apps } = req.body;
+
+  try {
+    const user = await User.findOneAndUpdate(
+      { username },
+      { $pull: { apps: { $in: apps } } }, // Remove os apps que estiverem na lista
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ message: "Usuário não encontrado" });
+    }
+
+    res.json({ message: "App(s) removido(s) com sucesso", user });
+  } catch (error) {
+    console.error("Erro ao remover app:", error);
+    res.status(500).json({ message: "Erro interno no servidor" });
+  }
+};
+
+
+
+export const obterUsuarioComApps = async (req, res) => {
+  try {
+    const { username } = req.params;
+    console.log("🔍 Buscando usuário:", username); // Debug
+
+    const user = await User.findOne({ username }).populate({
+      path: "apps",
+      select: "name description logo url status updatedAt"
+    });
+
+    console.log("Usuário no Login:", user);
+
+    if (!user) {
+      console.log("❌ Usuário não encontrado:", username);
+      return res.status(404).json({ message: "Usuário não encontrado" });
+    }
+
+    return res.status(200).json({ user, apps: user.apps });
+  } catch (error) {
+    console.error("❌ Erro ao obter usuário:", error);
+    return res.status(500).json({ message: "Erro interno do servidor" });
   }
 };
