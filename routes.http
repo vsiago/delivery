@@ -7,7 +7,7 @@ Content-Type: application/json
   "name": "Iago",
   "email": "vsiago24@gmail.com",
   "password": "81510156",
-  "role": "master"
+  "role": "Master"
 }
 
 ### FAZER LOGIN DO USUÁRIO MASTER
@@ -75,7 +75,7 @@ Content-Type: application/json
 
 ############## A P P S #################
 
-### Cadastrar App para o member
+### Cadastrar App para o Membro
 POST http://localhost:3333/api/apps/
 Content-Type: application/json
 

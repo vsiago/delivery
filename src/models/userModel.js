@@ -19,8 +19,8 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ['master', 'user', 'member', 'tecnico'],
-      default: 'user',
+      enum: ['Master', 'Cidadão', 'Membro', 'Técnico'],
+      default: 'Cidadão',
     },
     apps: [{ type: String }] // ✅ Agora aceita strings
   },
@@ -40,9 +40,9 @@ userSchema.methods.matchPassword = async function (password) {
   return await bcrypt.compare(password, this.password);
 };
 
-// Método para verificar se o usuário é master
+// Método para verificar se o usuário é Master
 userSchema.methods.isMaster = function () {
-  return this.role === 'master';
+  return this.role === 'Master';
 };
 
 export default mongoose.model('User', userSchema);

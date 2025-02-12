@@ -31,9 +31,9 @@ export const protect = async (req, res, next) => {
 };
 
 export const isMaster = (req, res, next) => {
-  if (req.user && req.user.role === 'master') {
+  if (req.user && req.user.role === 'Master') {
     next();
   } else {
-    res.status(403).json({ message: 'Acesso negado. Apenas usuários master podem alterar funções.' });
+    res.status(403).json({ message: 'Acesso negado. Apenas usuários Master podem alterar funções.' });
   }
 };

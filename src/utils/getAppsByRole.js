@@ -3,10 +3,10 @@ import App from "../models/appSchema.js";
 const getAppsByRole = async (role) => {
     const appsPorTipo = {
         user: ["Oportunidades", "IPTU"],
-        member: ["Chamados", "IPTU", "ItaMail", "ItaCloud", "ItaDesk"],
-        tecnico: ["ChamadosTecnicos", "OportunidadesTecnico", "ItaMail", "ItaCloud"],
+        Membro: ["Chamados", "IPTU", "ItaMail", "ItaCloud", "ItaDesk"],
+        Técnico: ["ChamadosTecnicos", "OportunidadesTecnico", "ItaMail", "ItaCloud"],
         administrador: ["AD"],
-        master: [
+        Master: [
             "Chamados",
             "ChamadosTecnicos",
             "Oportunidades",
@@ -20,9 +20,9 @@ const getAppsByRole = async (role) => {
 
     let apps = [];
 
-    if (role === 'master') {
-        // Para o 'master', buscamos todos os apps necessários para esse papel
-        apps = await App.find({ name: { $in: appsPorTipo.master } });
+    if (role === 'Master') {
+        // Para o 'Master', buscamos todos os apps necessários para esse papel
+        apps = await App.find({ name: { $in: appsPorTipo.Master } });
     } else if (appsPorTipo[role]) {
         // Para outros roles, buscamos os apps de acordo com a configuração
         apps = await App.find({ name: { $in: appsPorTipo[role] } });

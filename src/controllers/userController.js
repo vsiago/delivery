@@ -89,7 +89,7 @@ const getUserRole = (userGroups) => {
   userGroups.forEach((group) => {
     const groupName = group.split(",")[0].replace("CN=", ""); // Extrai o nome do grupo LDAP
     if (groupName === "Area Tecnica STI") {
-      roles.push("master");
+      roles.push("Master");
     } else if (groupName === "AssistenciaTecnica") {
       roles.push("support");
     } else if (groupName === "Financeiro") {
@@ -159,9 +159,9 @@ export const loginUser = async (req, res) => {
           const memberOf = ldapUser.memberOf;
 
           // Determinar o papel do usuário
-          let role = 'member';
+          let role = 'Membro';
           if (Array.isArray(memberOf) && memberOf.some(group => group.includes('STI'))) {
-            role = 'tecnico';
+            role = 'Técnico';
           }
 
           // Buscar usuário no banco
@@ -323,7 +323,7 @@ export const updateUserRole = async (req, res) => {
     }
 
     // Certifique-se de que o novo papel é válido
-    const validRoles = ['master', 'user', 'member', 'tecnico'];
+    const validRoles = ['Master', 'Cidadão', 'Membro', 'Técnico'];
     if (!validRoles.includes(newRole)) {
       return res.status(400).json({ message: 'Papel inválido.' });
     }
