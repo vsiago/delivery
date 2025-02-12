@@ -114,8 +114,8 @@ Content-Type: application/json
 {
   "apps": [
     {
-      "name": "Chamados Agro",
-      "description": "Aplicativo Painel Saúde.",
+      "name": "Agro Boi",
+      "description": "Um aplicativo Agro Boi.",
       "logo": "https://example.com/logos/oportunidades.png",
       "url": "https://example.com/oportunidades",
       "status": "ativo"
@@ -132,7 +132,7 @@ Content-Type: application/json
 
 {
   "username": "iago.vieira",
-  "apps": ["Chamados Agro"]
+  "apps": ["Agro Boi"]
 }
 
 ### Remover um app atribuido para um perfil LDAP
@@ -141,7 +141,7 @@ Content-Type: application/json
 
 {
   "username": "iago.vieira",
-  "apps": ["Chamados Assistência Social"]
+  "apps": ["Agro Boi"]
 }
 
 
@@ -161,4 +161,11 @@ Content-Type: application/json
 
 ### Buscar todos os usuários
 GET http://localhost:3333/api/users
+Content-Type: application/json
+
+###
+
+# Teste de autenticação do usuário (/me)
+GET http://localhost:3333/api/users/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YWEzMWQ4ZDM0OThmNTFjYzc5NWIzYiIsIm5hbWUiOiJJYWdvIiwiZW1haWwiOiJpYWdvLnZpZWlyYUBpdGFndWFpLnJqLmdvdi5iciIsInJvbGUiOiJtZW1iZXIiLCJpYXQiOjE3MzkzODA3MDYsImV4cCI6MTczOTk4NTUwNn0.vDwfGmjogaiMq2F72zaPGCQCwNg8bYglfkZNvv_6C6I
 Content-Type: application/json

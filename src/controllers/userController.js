@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import User from '../models/userModel.js'
 import UserApps from "../models/UserApps.js";
 import App from '../models/appSchema.js'
@@ -338,5 +339,56 @@ export const updateUserRole = async (req, res) => {
     res.json({ message: `O usuário ${user.username} agora tem o papel de ${newRole}` });
   } catch (error) {
     res.status(500).json({ message: 'Erro ao atualizar papel do usuário.', error: error.message });
+  }
+};
+
+export const getUserData = async (req, res) => {
+  try {
+    const userId = req.user.id; // Obtém ID do usuário a partir do token
+
+    let user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "Usuário não encontrado" });
+    }
+
+    // Se usuário veio do LDAP, atualizar caso necessário
+    if (user.dn) {
+      const updatedFields = {};
+      const ldapUser = req.user; // Pegando os dados do token, que já contém os dados do LDAP
+
+      if (user.username !== ldapUser.username) updatedFields.username = ldapUser.username;
+      if (user.name !== ldapUser.name) updatedFields.name = ldapUser.name;
+      if (user.email !== ldapUser.email) updatedFields.email = ldapUser.email;
+      if (user.role !== ldapUser.role) updatedFields.role = ldapUser.role;
+      if (user.dn !== ldapUser.dn) updatedFields.dn = ldapUser.dn;
+      if (JSON.stringify(user.memberOf) !== JSON.stringify(ldapUser.memberOf)) {
+        updatedFields.memberOf = ldapUser.memberOf;
+      }
+
+      if (Object.keys(updatedFields).length > 0) {
+        await User.updateOne({ _id: user.id }, updatedFields);
+        user = await User.findById(user.id); // Buscar usuário atualizado
+      }
+    }
+
+    // Buscar apps associados ao usuário
+    const apps = await getUserApps(user);
+
+    return res.json({
+      user: {
+        _id: user.id,
+        username: user.username,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        apps, // Apps dentro de "user"
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      },
+      token: req.token, // Retorna o mesmo token recebido na requisição
+    });
+  } catch (error) {
+    console.error("Erro ao buscar perfil do usuário:", error);
+    return res.status(500).json({ error: "Erro ao buscar perfil do usuário", message: error.message });
   }
 };
