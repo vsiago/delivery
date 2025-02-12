@@ -1,6 +1,6 @@
 import express from 'express';
-import { registerUser, loginUser, getUserProfile, definirAppsParaUsuario, obterUsuarioComApps, removerApp } from '../controllers/userController.js';
-import { protect } from '../middleware/authMiddleware.js';
+import { registerUser, loginUser, getUserProfile, definirAppsParaUsuario, obterUsuarioComApps, removerApp, updateUserRole } from '../controllers/userController.js';
+import { protect, isMaster } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
@@ -15,6 +15,9 @@ router.post("/remover-app", removerApp)
 
 // Rota para obter um usuário com seus aplicativos populados
 router.get('/:username', obterUsuarioComApps);
+
+// Apenas usuários master podem alterar roles
+router.put('/update-role', protect, isMaster, updateUserRole);
 
 
 export default router;

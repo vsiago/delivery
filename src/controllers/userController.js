@@ -310,3 +310,33 @@ export const obterUsuarioComApps = async (req, res) => {
     return res.status(500).json({ message: "Erro interno do servidor" });
   }
 };
+
+
+// Atualizar o papel (role) de um usuário
+export const updateUserRole = async (req, res) => {
+  try {
+    const { userId, newRole } = req.body;
+
+    if (!userId || !newRole) {
+      return res.status(400).json({ message: 'ID do usuário e novo papel são obrigatórios.' });
+    }
+
+    // Certifique-se de que o novo papel é válido
+    const validRoles = ['master', 'user', 'member', 'tecnico'];
+    if (!validRoles.includes(newRole)) {
+      return res.status(400).json({ message: 'Papel inválido.' });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'Usuário não encontrado.' });
+    }
+
+    user.role = newRole;
+    await user.save();
+
+    res.json({ message: `O usuário ${user.username} agora tem o papel de ${newRole}` });
+  } catch (error) {
+    res.status(500).json({ message: 'Erro ao atualizar papel do usuário.', error: error.message });
+  }
+};
