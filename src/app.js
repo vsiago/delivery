@@ -18,18 +18,14 @@ app.use(passport.initialize());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
-// Rotas principais
+// Rotas da aplicação geral
 app.use('/api/users', userRoutes);
 app.use('/api/apps', appsRoutes);
 app.use('/api/ldap', ldapRoutes); // ✅ Adicionando a nova rota LDAP
 
-app.get('/', (req, res) => {
-    res.send('Hello from App!');
-});
+// Rotas do App BIC
+// app.use('/api/bic' ())
 
-app.get('/hello', (req, res) => {
-    res.json({ hello: 'World' });
-});
 
 // Configuração do LDAP para autenticação com Passport
 const LDAP_OPTIONS = {

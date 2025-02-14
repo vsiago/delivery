@@ -18,9 +18,9 @@ router.get('/users', async (req, res) => {
         }
 
         const opts = {
-            filter: '(objectClass=user)', // Busca todos os usuários
+            filter: '(&(&(objectCategory=person)(objectClass=user))(!(sAMAccountName=*$$)))', // Busca todos os usuários
             scope: 'sub',
-            attributes: ['cn', 'sAMAccountName', 'mail', 'memberOf'], // Atributos desejados
+            attributes: ['cn', 'sAMAccountName', 'mail', 'memberOf', 'description', 'department'], // Atributos desejados
             paged: { pageSize: 5000 }, // Paginação para evitar limites do servidor
         };
 

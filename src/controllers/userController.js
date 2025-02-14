@@ -153,13 +153,15 @@ export const loginUser = async (req, res) => {
 
         try {
           const username = ldapUser.sAMAccountName;
-          const name = ldapUser.givenName || ldapUser.cn;
+          const name = ldapUser.cn;
           const email = ldapUser.mail;
           const dn = ldapUser.dn;
           const memberOf = ldapUser.memberOf;
+          const description = ldapUser.description;
+          const department = ldapUser.department;
 
           // Determinar o papel do usuário
-          let role = 'Membro';
+          let role = 'Servidor';
           if (Array.isArray(memberOf) && memberOf.some(group => group.includes('STI'))) {
             role = 'Técnico';
           }
@@ -169,7 +171,7 @@ export const loginUser = async (req, res) => {
 
           if (!user) {
             // Criar usuário se não existir
-            user = new User({ username, name, email, role, dn, memberOf });
+            user = new User({ username, name, email, role, dn, memberOf, description, department });
             await user.save();
           } else {
             // Comparar e atualizar se necessário (INCLUINDO USERNAME)
@@ -179,9 +181,11 @@ export const loginUser = async (req, res) => {
               user.email !== email ||
               user.role !== role ||
               user.dn !== dn ||
+              user.description !== description ||
+              user.department !== department ||
               JSON.stringify(user.memberOf) !== JSON.stringify(memberOf)
             ) {
-              await User.updateOne({ _id: user.id }, { username, name, email, role, dn, memberOf });
+              await User.updateOne({ _id: user.id }, { username, name, email, role, dn, memberOf, description, department });
             }
           }
 
@@ -198,6 +202,8 @@ export const loginUser = async (req, res) => {
               name: user.name,
               email: user.email,
               role: user.role,
+              matricula: user.description,
+              departament: user.department,
               apps, // Apps dentro de "user"
               createdAt: user.createdAt,
               updatedAt: user.updatedAt,
@@ -323,7 +329,7 @@ export const updateUserRole = async (req, res) => {
     }
 
     // Certifique-se de que o novo papel é válido
-    const validRoles = ['Master', 'Cidadão', 'Membro', 'Técnico'];
+    const validRoles = ['Master', 'Cidadão', 'Servidor', 'Técnico'];
     if (!validRoles.includes(newRole)) {
       return res.status(400).json({ message: 'Papel inválido.' });
     }

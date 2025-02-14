@@ -75,17 +75,17 @@ Content-Type: application/json
 
 ############## A P P S #################
 
-### Cadastrar App para o Membro
+### Cadastrar App para o Servidor
 POST http://localhost:3333/api/apps/
 Content-Type: application/json
 
 {
   "apps": [
     {
-      "name": "IPTU",
-      "description": "Aplicativo IPTU.",
+      "name": "Biométrico Saúde",
+      "description": "Um aplicativo de Biometria para funcionários da Saúde.",
       "logo": "https://example.com/logos/oportunidades.png",
-      "url": "https://example.com/oportunidades",
+      "url": "prefeitura@itaguai.rj.gov.br/biometrico-saude",
       "status": "ativo"
     }
   ]
@@ -114,8 +114,8 @@ Content-Type: application/json
 {
   "apps": [
     {
-      "name": "Agro Boi",
-      "description": "Um aplicativo Agro Boi.",
+      "name": "BIC",
+      "description": "Um aplicativo De Reurbanização.",
       "logo": "https://example.com/logos/oportunidades.png",
       "url": "https://example.com/oportunidades",
       "status": "ativo"
@@ -131,8 +131,8 @@ POST http://localhost:3333/api/users/definir-apps
 Content-Type: application/json
 
 {
-  "username": "iago.vieira",
-  "apps": ["Agro Boi"]
+  "username": "wallace.moreira",
+  "apps": ["BIC"]
 }
 
 ### Remover um app atribuido para um perfil LDAP
@@ -140,7 +140,7 @@ POST http://localhost:3333/api/users/remover-app
 Content-Type: application/json
 
 {
-  "username": "iago.vieira",
+  "username": "wallace.moreira",
   "apps": ["Agro Boi"]
 }
 
