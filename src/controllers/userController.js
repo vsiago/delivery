@@ -136,8 +136,11 @@ export const loginUser = async (req, res) => {
           const description = ldapUser.description;
           const department = ldapUser.department;
 
-          // Definir o papel do usuário sempre como "Servidor"
+          // Determinar o papel do usuário
           let role = 'Servidor';
+          // if (Array.isArray(memberOf) && memberOf.some(group => group.includes('STI'))) {
+          //   role = 'Técnico';
+          // }
 
           // Buscar usuário no banco
           let user = await User.findOne({ $or: [{ email }, { username }] });
