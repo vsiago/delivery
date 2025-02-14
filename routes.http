@@ -131,7 +131,7 @@ POST http://localhost:3333/api/users/definir-apps
 Content-Type: application/json
 
 {
-  "username": "wallace.moreira",
+  "username": "ronyson.fonseca",
   "apps": ["BIC"]
 }
 
@@ -151,7 +151,7 @@ Content-Type: application/json
 
 {
   "username": "iago.vieira",
-  "apps": ["ChamadosTecnicos"]
+  "apps": ["BIC"]
 }
 
 
@@ -169,3 +169,154 @@ Content-Type: application/json
 GET http://localhost:3333/api/users/me
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YWEzMWQ4ZDM0OThmNTFjYzc5NWIzYiIsIm5hbWUiOiJJYWdvIiwiZW1haWwiOiJpYWdvLnZpZWlyYUBpdGFndWFpLnJqLmdvdi5iciIsInJvbGUiOiJtZW1iZXIiLCJpYXQiOjE3MzkzODA3MDYsImV4cCI6MTczOTk4NTUwNn0.vDwfGmjogaiMq2F72zaPGCQCwNg8bYglfkZNvv_6C6I
 Content-Type: application/json
+
+###
+
+GET http://localhost:3333/api/ldap/users
+Content-Type: application/json
+
+###
+
+POST http://localhost:3333/api/ldap/register-ldap-user
+Content-Type: application/json
+
+{
+  "username": "iago.vieira"
+}
+
+
+
+
+
+### ********** Cadastrar ou Atualizar Apps ********** ###
+
+POST http://localhost:3333/api/apps/
+Content-Type: application/json
+
+{
+  "apps": [
+    {
+      "name": "BIC",
+      "description": "Regularização fundiária de Itaguaí",
+      "logoUrl": "/logo-bic.svg",
+      "pathApp": "bic",
+      "url": "https://bic.itaguai.rj.gov.br",
+      "requiresAuth": true,
+      "loginMethod": "email-password",
+      "state": "ativo",
+      "category": "Servidor",
+      "allowedDepartments": ["Fazenda"]
+    },
+    {
+      "name": "ItaMail",
+      "description": "Aplicativo de E-mail do Servidor",
+      "logoUrl": "/logo-itamail.svg",
+      "pathApp": "itamail",
+      "url": "https://itamail.itaguai.rj.gov.br",
+      "requiresAuth": true,
+      "loginMethod": "email-password",
+      "state": "ativo",
+      "category": "Servidor",
+      "allowedDepartments": ["Fazenda"]
+    },
+    {
+      "name": "Itadesk",
+      "description": "Itadesk",
+      "logoUrl": "/logo-itadesk.svg",
+      "pathApp": "itadesk",
+      "url": "https://itadesk.itaguai.rj.gov.br/",
+      "requiresAuth": false,
+      "state": "ativo",
+      "category": "Servidor",
+      "allowedDepartments": ["Area tecnica"]
+    },
+    {
+      "name": "Protocolo",
+      "description": "Aplicativo de protocolo do Servidor",
+      "logoUrl": "/logo-protocolo.svg",
+      "pathApp": "protocolo",
+      "url": "https://adm.itaguai.rj.gov.br/adm/open.do?action=open&sys=PRO",
+      "requiresAuth": true,
+      "loginMethod": "email-password",
+      "state": "ativo",
+      "category": "Servidor",
+      "allowedDepartments": ["Administração"]
+    },
+    {
+      "name": "Licitação",
+      "description": "Aplicativo de licitação do Servidor",
+      "logoUrl": "/logo-licitacao.svg",
+      "pathApp": "licitacao",
+      "url": "https://adm.itaguai.rj.gov.br/adm/open.do?action=open&sys=LIC",
+      "requiresAuth": true,
+      "loginMethod": "email-password",
+      "state": "ativo",
+      "category": "Servidor",
+      "allowedDepartments": ["Licitação"]
+    },
+    {
+      "name": "Patrimônio",
+      "description": "Aplicativo de patrimônio do Servidor",
+      "logoUrl": "/logo-patrimonio.svg",
+      "pathApp": "patrimonio",
+      "url": "https://adm.itaguai.rj.gov.br/adm/open.do?action=open&sys=PAT",
+      "requiresAuth": true,
+      "loginMethod": "email-password",
+      "state": "ativo",
+      "category": "Servidor",
+      "allowedDepartments": ["Patrimônio"]
+    },
+    {
+      "name": "Almoxarifado",
+      "description": "Aplicativo de almoxarifado do Servidor",
+      "logoUrl": "/logo-almoxarifado.svg",
+      "pathApp": "almoxarifado",
+      "url": "https://adm.itaguai.rj.gov.br/adm/open.do?action=open&sys=ALM",
+      "requiresAuth": true,
+      "loginMethod": "email-password",
+      "state": "ativo",
+      "category": "Servidor",
+      "allowedDepartments": ["Almoxarifado"]
+    },
+    {
+      "name": "Jornal Oficial",
+      "description": "Diário oficial do município",
+      "logoUrl": "/logo-jornal-oficial.svg",
+      "pathApp": "jornal-oficial",
+      "url": "https://novoportal.itaguai.rj.gov.br/paginas/jornal-oficial",
+      "requiresAuth": false,
+      "category": "Cidadão",
+      "state": "ativo"
+    },
+    {
+      "name": "Transparência",
+      "description": "Portal transparência do município",
+      "logoUrl": "/logo-transparencia.svg",
+      "pathApp": "transparencia",
+      "url": "https://portal.transparencia.itaguai.rj.gov.br/",
+      "requiresAuth": false,
+      "category": "Cidadão",
+      "state": "ativo"
+    },
+    {
+      "name": "ISS",
+      "description": "NFS-e",
+      "logoUrl": "/logo-nfse.svg",
+      "pathApp": "nfse",
+      "url": "https://spe.itaguai.rj.gov.br/senhaweb/login.aspx",
+      "requiresAuth": false,
+      "category": "Cidadão",
+      "state": "ativo"
+    },
+    {
+      "name": "Emissão da 2ª via de IPTU",
+      "description": "IPTU",
+      "logoUrl": "/logo-iptu.svg",
+      "pathApp": "iptu",
+      "url": "https://siarm.itaguai.rj.gov.br/siarm/informacoes/2",
+      "requiresAuth": false,
+      "category": "Cidadão",
+      "state": "ativo"
+    }
+  ]
+}

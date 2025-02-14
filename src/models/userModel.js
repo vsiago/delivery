@@ -19,7 +19,7 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ['Master', 'Cidadão', 'Servidor', 'Técnico'],
+      enum: ['Master', 'Cidadão', 'Servidor', 'Técnico', 'Coordenador'],
       default: 'Servidor',
     },
     apps: [{ type: String }] // ✅ Agora aceita strings

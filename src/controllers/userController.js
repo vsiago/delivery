@@ -8,6 +8,7 @@ import passport from 'passport'
 import LdapStrategy from 'passport-ldapauth'
 import dotenv from 'dotenv'
 import bcrypt from 'bcrypt'
+import { searchLdap } from "../config/ldapConfig.js";
 
 dotenv.config()
 
@@ -55,31 +56,7 @@ export const registerUser = async (req, res) => {
     res.status(500).json({ message: 'Erro no servidor', error: error.message });
   }
 };
-// Lista de aplicativos por grupo
-const appsByGroup = {
-  default: ["Chamados", "ITaMail", "ItaCloud"],
-  AssistenciaTecnica: ["ChamadosOrders", "Email", "Suporte"],
-  Financeiro: ["Faturas", "Relatórios"],
-  Master: "ALL", // Acesso total
-};
 
-// Função para obter aplicativos permitidos com base nos grupos do usuário
-const getUserApps = async (user) => {
-  // Buscar apps padrão baseado no papel do usuário
-  const defaultApps = await getAppsByRole(user.role);
-
-  // Buscar os apps que foram atribuídos manualmente ao usuário
-  const userApps = user.apps || [];
-  const manualApps = await App.find({ name: { $in: userApps } });
-
-  // Combinar ambos, garantindo que não haja duplicatas
-  const allApps = [...defaultApps, ...manualApps].filter(
-    (app, index, self) =>
-      index === self.findIndex((a) => a.name === app.name) // Remover duplicatas
-  );
-
-  return allApps;
-};
 
 // Função para mapear grupos LDAP para roles
 const getUserRole = (userGroups) => {
@@ -134,7 +111,6 @@ export const loginUser = async (req, res) => {
       }
     } else if (data.includes('.')) {
 
-
       // Login via LDAP
       const username = data;
       req.body.username = username;
@@ -160,11 +136,8 @@ export const loginUser = async (req, res) => {
           const description = ldapUser.description;
           const department = ldapUser.department;
 
-          // Determinar o papel do usuário
+          // Definir o papel do usuário sempre como "Servidor"
           let role = 'Servidor';
-          if (Array.isArray(memberOf) && memberOf.some(group => group.includes('STI'))) {
-            role = 'Técnico';
-          }
 
           // Buscar usuário no banco
           let user = await User.findOne({ $or: [{ email }, { username }] });
@@ -189,7 +162,6 @@ export const loginUser = async (req, res) => {
             }
           }
 
-
           const token = generateToken(user.id, user.name, user.email, role);
 
           // Buscar apps associados ao usuário (padrões + adicionados manualmente)
@@ -203,7 +175,7 @@ export const loginUser = async (req, res) => {
               email: user.email,
               role: user.role,
               matricula: user.description,
-              departament: user.department,
+              departament: user.department, // Mantendo departament como chave
               apps, // Apps dentro de "user"
               createdAt: user.createdAt,
               updatedAt: user.updatedAt,
@@ -348,6 +320,76 @@ export const updateUserRole = async (req, res) => {
   }
 };
 
+// Função para buscar e categorizar os aplicativos com base no perfil do usuário
+const getUserApps = async (user) => {
+  try {
+    const allApps = await App.find({ state: "ativo" });
+
+    const categorizedApps = {
+      master: [],
+      coordenador: [],
+      tecnico: [],
+      servidor: [],
+      cidadão: [],
+    };
+
+    allApps.forEach((app) => {
+      switch (app.category) {
+        case "Master":
+          categorizedApps.master.push(app);
+          break;
+        case "Coordenador":
+          categorizedApps.coordenador.push(app);
+          break;
+        case "Técnico":
+          categorizedApps.tecnico.push(app);
+          break;
+        case "Servidor":
+          categorizedApps.servidor.push(app);
+          break;
+        case "Cidadão":
+          categorizedApps.cidadão.push(app);
+          break;
+        default:
+          break;
+      }
+    });
+
+    // Define quais categorias cada usuário pode acessar
+    const userApps = {};
+    switch (user.role) {
+      case "Master":
+        userApps.master = categorizedApps.coordenador.concat(categorizedApps.tecnico, categorizedApps.servidor, categorizedApps.cidadão);
+        break;
+      case "Coordenador":
+        userApps.coordenador = categorizedApps.coordenador;
+        userApps.servidor = categorizedApps.servidor;
+        userApps.cidadão = categorizedApps.cidadão;
+        break;
+      case "Técnico":
+        userApps.tecnico = categorizedApps.tecnico;
+        userApps.servidor = categorizedApps.servidor;
+        userApps.cidadão = categorizedApps.cidadão;
+        break;
+      case "Servidor":
+        userApps.servidor = categorizedApps.servidor;
+        userApps.cidadão = categorizedApps.cidadão;
+        break;
+      case "Cidadão":
+        userApps.cidadão = categorizedApps.cidadão;
+        break;
+      default:
+        break;
+    }
+
+    return userApps;
+  } catch (error) {
+    console.error("Erro ao buscar aplicativos:", error);
+    return {};
+  }
+};
+
+// Controller atualizado para retornar os apps categorizados
 export const getUserData = async (req, res) => {
   try {
     const userId = req.user.id; // Obtém ID do usuário a partir do token
@@ -377,7 +419,7 @@ export const getUserData = async (req, res) => {
       }
     }
 
-    // Buscar apps associados ao usuário
+    // Buscar apps categorizados para o usuário
     const apps = await getUserApps(user);
 
     return res.json({
@@ -387,7 +429,7 @@ export const getUserData = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        apps, // Apps dentro de "user"
+        apps, // Apps organizados por categoria dentro de "user"
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
       },
