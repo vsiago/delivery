@@ -167,7 +167,7 @@ Content-Type: application/json
 
 # Teste de autenticação do usuário (/me)
 GET http://localhost:3333/api/users/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YWEzMWQ4ZDM0OThmNTFjYzc5NWIzYiIsIm5hbWUiOiJJYWdvIiwiZW1haWwiOiJpYWdvLnZpZWlyYUBpdGFndWFpLnJqLmdvdi5iciIsInJvbGUiOiJtZW1iZXIiLCJpYXQiOjE3MzkzODA3MDYsImV4cCI6MTczOTk4NTUwNn0.vDwfGmjogaiMq2F72zaPGCQCwNg8bYglfkZNvv_6C6I
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YWY5YmUwNTE2NTdlNzFlYTI5Nzg4NiIsIm5hbWUiOiJJYWdvIFNvdXphIFZpZWlyYSIsImVtYWlsIjoiaWFnby52aWVpcmFAaXRhZ3VhaS5yai5nb3YuYnIiLCJyb2xlIjoiU2Vydmlkb3IiLCJpYXQiOjE3Mzk5MDE4NzUsImV4cCI6MTc0MDUwNjY3NX0.kfj_0SAIPVTaxtL0ZWvCp3wSGy5VdB4rayCr19PIgKg
 Content-Type: application/json
 
 ###
@@ -183,9 +183,6 @@ Content-Type: application/json
 {
   "username": "iago.vieira"
 }
-
-
-
 
 
 ### ********** Cadastrar ou Atualizar Apps ********** ###
@@ -320,3 +317,16 @@ Content-Type: application/json
     }
   ]
 }
+
+### Buscar usuários por solução
+GET http://localhost:3333/api/ldap/users/department/SMCTIC
+
+### Buscar usuários por solução
+GET http://localhost:3333/api/ldap/users/solution/SMFPL
+
+### Buscar usuários por solução
+GET http://localhost:3333/api/ldap/users/groups/ronyson.fonseca
+
+### Buscar usuários por grupos
+
+GET http://localhost:3333/api/ldap/users/groups/iago.vieira
