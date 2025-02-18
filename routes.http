@@ -324,9 +324,8 @@ GET http://localhost:3333/api/ldap/users/department/SMCTIC
 ### Buscar usuários por solução
 GET http://localhost:3333/api/ldap/users/solution/SMFPL
 
-### Buscar usuários por solução
+### Buscar usuários por groups
 GET http://localhost:3333/api/ldap/users/groups/ronyson.fonseca
 
 ### Buscar usuários por grupos
-
 GET http://localhost:3333/api/ldap/users/groups/iago.vieira

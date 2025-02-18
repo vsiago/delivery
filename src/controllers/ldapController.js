@@ -356,7 +356,6 @@ export const searchUsersByGroup = async (groupDN) => {
 };
 
 
-
 export const getUsersByGroups = async (req, res) => {
     try {
         const username = req.params.username;
@@ -369,14 +368,17 @@ export const getUsersByGroups = async (req, res) => {
         // 1️⃣ Buscar os grupos do usuário
         const groups = await searchUserGroups(username, baseDN);
 
-        if (!groups.length) {
+        // Garante que sempre seja um array
+        const formattedGroups = Array.isArray(groups) ? groups : groups ? [groups] : [];
+
+        if (!formattedGroups.length) {
             return res.json({ username, groups: [], usersByGroup: {} });
         }
 
         // 2️⃣ Buscar usuários pertencentes a cada grupo encontrado
         let usersByGroup = {};
 
-        for (const groupDN of groups) {
+        for (const groupDN of formattedGroups) {
             console.log(`🔍 Buscando usuários no grupo: ${groupDN}`);
 
             // Busca os usuários dentro desse grupo específico
@@ -386,12 +388,10 @@ export const getUsersByGroups = async (req, res) => {
             usersByGroup[groupDN] = users;
         }
 
-        res.json({ username, groups, usersByGroup });
+        res.json({ username, groups: formattedGroups, usersByGroup });
 
     } catch (error) {
         console.error("Erro ao buscar usuários dos grupos:", error);
         res.status(500).json({ error: "Erro ao buscar usuários dos grupos no LDAP" });
     }
 };
-
-
