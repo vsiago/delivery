@@ -392,7 +392,8 @@ const getUserApps = async (user) => {
   }
 };
 
-// Controller atualizado para retornar os apps categorizados
+import axios from "axios";
+
 export const getUserData = async (req, res) => {
   try {
     const userId = req.user.id; // Obtém ID do usuário a partir do token
@@ -425,6 +426,15 @@ export const getUserData = async (req, res) => {
     // Buscar apps categorizados para o usuário
     const apps = await getUserApps(user);
 
+    // 🔍 Buscar usuários por grupos usando o username do usuário
+    let usersByGroup = {};
+    try {
+      const response = await axios.get(`http://localhost:3333/api/ldap/users/groups/${user.username}`);
+      usersByGroup = response.data.usersByGroup || {};
+    } catch (error) {
+      console.error("Erro ao buscar usuários por grupos:", error.message);
+    }
+
     return res.json({
       user: {
         _id: user.id,
@@ -435,6 +445,7 @@ export const getUserData = async (req, res) => {
         apps, // Apps organizados por categoria dentro de "user"
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
+        usersByGroup, // 🚀 Adicionando os usuários por grupo na resposta
       },
       token: req.token, // Retorna o mesmo token recebido na requisição
     });

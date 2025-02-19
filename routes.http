@@ -328,4 +328,4 @@ GET http://localhost:3333/api/ldap/users/solution/SMFPL
 GET http://localhost:3333/api/ldap/users/groups/ronyson.fonseca
 
 ### Buscar usuários por grupos
-GET http://localhost:3333/api/ldap/users/groups/iago.vieira
+GET http://localhost:3333/api/ldap/users/groups/luiz.monteiro

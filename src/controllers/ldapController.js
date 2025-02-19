@@ -381,11 +381,15 @@ export const getUsersByGroups = async (req, res) => {
         for (const groupDN of formattedGroups) {
             console.log(`🔍 Buscando usuários no grupo: ${groupDN}`);
 
+            // Extrai o nome do grupo do DN
+            const match = groupDN.match(/CN=([^,]+)/);
+            const groupName = match ? match[1] : groupDN; // Usa o nome extraído ou o DN inteiro como fallback
+
             // Busca os usuários dentro desse grupo específico
             const users = await searchLDAPUsersByGroups(groupDN);
 
             // Adiciona os usuários ao objeto categorizado
-            usersByGroup[groupDN] = users;
+            usersByGroup[groupName] = users;
         }
 
         res.json({ username, groups: formattedGroups, usersByGroup });
