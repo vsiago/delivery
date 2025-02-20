@@ -112,17 +112,18 @@ POST http://localhost:3333/api/apps/
 Content-Type: application/json
 
 {
+  "userId": "67af9be051657e71ea297886",
   "apps": [
     {
       "name": "BIC",
-      "description": "Um aplicativo De Reurbanização.",
+      "description": "Um aplicativo de Reurbanização.",
       "logo": "https://example.com/logos/oportunidades.png",
       "url": "https://example.com/oportunidades",
-      "status": "ativo"
+      "status": "ativo",
+      "category": "Coordenador"
     }
   ]
 }
-
 
 ############## D E F I N I R  A P P S  P A R A  U S U Á R I O S #################
 
@@ -192,18 +193,6 @@ Content-Type: application/json
 
 {
   "apps": [
-    {
-      "name": "BIC",
-      "description": "Regularização fundiária de Itaguaí",
-      "logoUrl": "/logo-bic.svg",
-      "pathApp": "bic",
-      "url": "https://bic.itaguai.rj.gov.br",
-      "requiresAuth": true,
-      "loginMethod": "email-password",
-      "state": "ativo",
-      "category": "Servidor",
-      "allowedDepartments": ["Fazenda"]
-    },
     {
       "name": "ItaMail",
       "description": "Aplicativo de E-mail do Servidor",
