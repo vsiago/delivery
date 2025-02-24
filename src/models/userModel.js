@@ -4,25 +4,16 @@ import bcrypt from 'bcrypt';
 const userSchema = new mongoose.Schema(
   {
     username: { type: String, required: false, unique: true },
-    name: {
-      type: String,
-      required: [true, 'O nome é obrigatório'],
-    },
-    email: {
-      type: String,
-      unique: true,
-      lowercase: true,
-    },
-    password: {
-      type: String,
-      select: false
-    },
+    name: { type: String, required: [true, 'O nome é obrigatório'] },
+    email: { type: String, unique: true, lowercase: true },
+    password: { type: String, select: false },
     role: {
       type: String,
       enum: ['Master', 'Cidadão', 'Servidor', 'Técnico', 'Coordenador'],
       default: 'Servidor',
     },
-    apps: [{ type: String }] // ✅ Agora aceita strings
+    apps: [{ type: String }], // ✅ Apps globais do usuário
+    specificApplications: [{ type: String }] // ✅ Lista de apps específicos
   },
   { timestamps: true }
 );

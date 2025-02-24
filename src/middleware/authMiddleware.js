@@ -37,3 +37,14 @@ export const isMaster = (req, res, next) => {
     res.status(403).json({ message: 'Acesso negado. Apenas usuários Master podem alterar funções.' });
   }
 };
+
+export const isTecnico = async (req, res, next) => {
+  try {
+    if (!req.user || req.user.role !== 'Coordenador') {
+      return res.status(403).json({ message: 'Acesso negado. Apenas Coordenadores podem promover Técnicos.' });
+    }
+    next();
+  } catch (error) {
+    res.status(500).json({ message: 'Erro interno do servidor.' });
+  }
+};

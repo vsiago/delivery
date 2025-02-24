@@ -318,3 +318,26 @@ GET http://localhost:3333/api/ldap/users/groups/ronyson.fonseca
 
 ### Buscar usuários por grupos
 GET http://localhost:3333/api/ldap/users/groups/luiz.monteiro
+
+
+### Definir um programa específico para um usuário Coordenador
+
+POST http://localhost:3333/api/apps/install
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YmM3ZjA1ZGUwYjk2OWE4ZDRiN2U1YyIsIm5hbWUiOiJJYWdvIiwiZW1haWwiOiJ2c2lhZ28yNEBnbWFpbC5jb20iLCJyb2xlIjoiTWFzdGVyIiwiaWF0IjoxNzQwNDA2NTMzLCJleHAiOjE3NDEwMTEzMzN9.ttDGArPxdwBDHrJw6RQAG4mypoQiAsKaWDMbHRJGdHs
+Content-Type: application/json
+
+{
+  "username": "ronyson.fonseca",
+  "apps": ["BIC"]
+}
+
+### Definir um programa específico para um Técnico BIC
+
+POST http://localhost:3333/api/apps/instal-tecnico
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YjcyNzEyNzlhNjcwYzViMmRhYmU4NSIsIm5hbWUiOiJSb255c29uIGRhIFNpbHZhIEZvbnNlY2EiLCJlbWFpbCI6InJvbnlzb24uZm9uc2VjYUBpdGFndWFpLnJqLmdvdi5iciIsInJvbGUiOiJDb29yZGVuYWRvciIsImlhdCI6MTc0MDQwNDcyNiwiZXhwIjoxNzQxMDA5NTI2fQ.QCKorf6UoUzom4zqsycqbHLluOj9QilVt4Q6Iv3i1Dw
+Content-Type: application/json
+
+{
+  "username": "iago.vieira",
+  "apps": ["BIC"]
+}

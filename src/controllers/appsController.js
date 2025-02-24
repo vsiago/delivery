@@ -1,4 +1,6 @@
 import App from '../models/appSchema.js';
+import userModel from '../models/userModel.js';
+import fetch from 'node-fetch';
 
 export const createOrUpdateApps = async (req, res) => {
     try {
@@ -49,5 +51,107 @@ export const createOrUpdateApps = async (req, res) => {
     } catch (error) {
         console.error("Erro ao cadastrar, atualizar ou remover aplicativos:", error);
         res.status(500).json({ error: "Erro ao cadastrar, atualizar ou remover aplicativos" });
+    }
+};
+
+// ✅ Controlador para instalar aplicativos específicos e atualizar o role
+export const installSpecificApp = async (req, res) => {
+    try {
+        const { username, apps } = req.body;
+
+        // Verifica se os parâmetros necessários foram enviados
+        if (!username || !apps || !Array.isArray(apps)) {
+            return res.status(400).json({ error: 'Username e apps são obrigatórios, e apps deve ser um array.' });
+        }
+
+        // Busca o usuário pelo username
+        const user = await userModel.findOne({ username });
+
+        if (!user) {
+            return res.status(404).json({ error: 'Usuário não encontrado.' });
+        }
+
+        // Atualiza os aplicativos específicos e o role para Coordenador
+        user.specificApplications = apps;
+        user.role = 'Coordenador';
+
+        await user.save();
+
+        res.status(200).json({
+            message: 'Apps instalados e role atualizado com sucesso.',
+            user: {
+                username: user.username,
+                specificApplications: user.specificApplications,
+                role: user.role
+            }
+        });
+
+    } catch (error) {
+        console.error('Erro ao instalar apps e atualizar role:', error);
+        res.status(500).json({ error: 'Erro interno do servidor.' });
+    }
+};
+
+
+// ✅ Registar um usuário no app, Instalar aplicativos específicos e atualizar o role para Técnico
+export const installSpecificAppTecnico = async (req, res) => {
+    try {
+        const { username, apps } = req.body;
+
+        // Verifica se os parâmetros foram enviados corretamente
+        if (!username || !apps || !Array.isArray(apps)) {
+            return res.status(400).json({ error: 'Username e apps são obrigatórios, e apps deve ser um array.' });
+        }
+
+        // Verifica se o usuário autenticado é um Coordenador
+        const coordinator = await userModel.findOne({ username: req.user.username, role: 'Coordenador' });
+
+        if (!coordinator) {
+            return res.status(403).json({ error: 'Apenas Coordenadores podem promover Técnicos.' });
+        }
+
+        // Busca o usuário pelo username
+        let user = await userModel.findOne({ username });
+
+        // Se o usuário não existir, registra ele via LDAP
+        if (!user) {
+            const ldapResponse = await fetch('http://localhost:3333/api/ldap/register-ldap-user', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username }),
+            });
+
+            if (!ldapResponse.ok) {
+                return res.status(500).json({ error: 'Erro ao registrar usuário no LDAP.' });
+            }
+
+            // Após registrar, busca o usuário novamente
+            user = await userModel.findOne({ username });
+
+            if (!user) {
+                return res.status(500).json({ error: 'Usuário registrado, mas não encontrado na base local.' });
+            }
+        }
+
+        // Atualiza os aplicativos específicos e o role para Técnico
+        user.specificApplications = apps;
+        user.role = 'Técnico';
+
+        await user.save();
+
+        res.status(200).json({
+            message: 'Apps instalados e role atualizado para Técnico com sucesso.',
+            user: {
+                username: user.username,
+                specificApplications: user.specificApplications,
+                role: user.role
+            }
+        });
+
+    } catch (error) {
+        console.error('Erro ao instalar apps e atualizar role para Técnico:', error);
+        res.status(500).json({ error: 'Erro interno do servidor.' });
     }
 };

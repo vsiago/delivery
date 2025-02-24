@@ -136,32 +136,39 @@ export const loginUser = async (req, res) => {
           const description = ldapUser.description;
           const department = ldapUser.department;
 
-          // Determinar o papel do usuário
-          let role = 'Servidor';
-          // if (Array.isArray(memberOf) && memberOf.some(group => group.includes('STI'))) {
-          //   role = 'Técnico';
-          // }
-
           // Buscar usuário no banco
           let user = await User.findOne({ $or: [{ email }, { username }] });
 
+          let role
+
           if (!user) {
-            // Criar usuário se não existir
+            role = 'Servidor';
+            // Se o usuário não existir, cria um novo com role 'Servidor' por padrão
             user = new User({ username, name, email, role, dn, memberOf, description, department });
             await user.save();
           } else {
-            // Comparar e atualizar se necessário (INCLUINDO USERNAME)
+            // Mantém o papel existente salvo no banco
+            role = user.role; // Aqui evitamos sobrescrever um papel promovido
+
+            // Comparar e atualizar se necessário (INCLUINDO USERNAME, mas SEM modificar o role)
             if (
-              user.username !== username ||  // Verifica se o username está salvo
+              user.username !== username ||
               user.name !== name ||
               user.email !== email ||
-              user.role !== role ||
               user.dn !== dn ||
               user.description !== description ||
               user.department !== department ||
               JSON.stringify(user.memberOf) !== JSON.stringify(memberOf)
             ) {
-              await User.updateOne({ _id: user.id }, { username, name, email, role, dn, memberOf, description, department });
+              await User.updateOne({ _id: user.id }, {
+                username,
+                name,
+                email,
+                dn,
+                memberOf,
+                description,
+                department
+              });
             }
           }
 
@@ -443,6 +450,7 @@ export const getUserData = async (req, res) => {
         email: user.email,
         role: user.role,
         apps, // Apps organizados por categoria dentro de "user"
+        specificApplications: user.specificApplications || [], // ✅ Incluindo os apps específicos do usuário
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
         usersByGroup, // 🚀 Adicionando os usuários por grupo na resposta

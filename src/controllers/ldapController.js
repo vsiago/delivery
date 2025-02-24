@@ -6,7 +6,9 @@ export const getLdapUser = async (username) => {
     return new Promise((resolve, reject) => {
         const client = createLdapClient();
 
-        client.options.referrals = 0; // Desativa referrals no cliente
+        if (client.options) {
+            client.options.referrals = 0;
+        }
 
         client.bind(LDAP_CONFIG.bindDN, LDAP_CONFIG.bindCredentials, async (err) => {
             if (err) {
@@ -117,6 +119,10 @@ export const getAllLdapUsers = async (req, res) => {
     try {
         console.log("🔍 Buscando todos os usuários no LDAP...");
         const client = createLdapClient();
+        if (!client) {
+            console.error("❌ Erro: createLdapClient() não retornou um cliente válido.");
+            return reject(new Error("Erro ao criar cliente LDAP"));
+        }
 
         client.bind(LDAP_CONFIG.bindDN, LDAP_CONFIG.bindCredentials, async (err) => {
             if (err) {
