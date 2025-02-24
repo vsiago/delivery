@@ -317,7 +317,7 @@ GET http://localhost:3333/api/ldap/users/solution/SMFPL
 GET http://localhost:3333/api/ldap/users/groups/ronyson.fonseca
 
 ### Buscar usuários por grupos
-GET http://localhost:3333/api/ldap/users/groups/luiz.monteiro
+GET http://localhost:3333/api/ldap/users/groups/ronyson.fonseca
 
 
 ### Definir um programa específico para um usuário Coordenador
@@ -334,7 +334,17 @@ Content-Type: application/json
 ### Definir um programa específico para um Técnico BIC
 
 POST http://localhost:3333/api/apps/instal-tecnico
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YjcyNzEyNzlhNjcwYzViMmRhYmU4NSIsIm5hbWUiOiJSb255c29uIGRhIFNpbHZhIEZvbnNlY2EiLCJlbWFpbCI6InJvbnlzb24uZm9uc2VjYUBpdGFndWFpLnJqLmdvdi5iciIsInJvbGUiOiJDb29yZGVuYWRvciIsImlhdCI6MTc0MDQwNDcyNiwiZXhwIjoxNzQxMDA5NTI2fQ.QCKorf6UoUzom4zqsycqbHLluOj9QilVt4Q6Iv3i1Dw
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YmNhY2UzZGI0MjZkNTg1ZjFiZmU2NSIsIm5hbWUiOiJSb255c29uIGRhIFNpbHZhIEZvbnNlY2EiLCJlbWFpbCI6InJvbnlzb24uZm9uc2VjYUBpdGFndWFpLnJqLmdvdi5iciIsInJvbGUiOiJDb29yZGVuYWRvciIsImlhdCI6MTc0MDQxODc5MCwiZXhwIjoxNzQxMDIzNTkwfQ.BkL9XJ-utjxPl_hm-le-lDx6g2W1l56vdqzWjSPyEoA
+Content-Type: application/json
+
+{
+  "username": "iago.vieira",
+  "apps": ["BIC"]
+}
+
+### Remove um app específico e rebaixa o role para Servidor
+
+POST http://localhost:3333/api/apps/uninstall
 Content-Type: application/json
 
 {

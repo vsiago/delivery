@@ -371,10 +371,8 @@ export const getUsersByGroups = async (req, res) => {
             return res.status(400).json({ error: "Nome de usuário é obrigatório" });
         }
 
-        // 1️⃣ Buscar os grupos do usuário
+        // 1️⃣ Buscar os grupos do usuário no LDAP
         const groups = await searchUserGroups(username, baseDN);
-
-        // Garante que sempre seja um array
         const formattedGroups = Array.isArray(groups) ? groups : groups ? [groups] : [];
 
         if (!formattedGroups.length) {
@@ -389,13 +387,24 @@ export const getUsersByGroups = async (req, res) => {
 
             // Extrai o nome do grupo do DN
             const match = groupDN.match(/CN=([^,]+)/);
-            const groupName = match ? match[1] : groupDN; // Usa o nome extraído ou o DN inteiro como fallback
+            const groupName = match ? match[1] : groupDN;
 
-            // Busca os usuários dentro desse grupo específico
-            const users = await searchLDAPUsersByGroups(groupDN);
+            // Busca os usuários dentro desse grupo no LDAP
+            const ldapUsers = await searchLDAPUsersByGroups(groupDN);
 
-            // Adiciona os usuários ao objeto categorizado
-            usersByGroup[groupName] = users;
+            // 3️⃣ Buscar os usuários no MongoDB e popular `specificApplications`
+            const usersWithApps = await Promise.all(
+                ldapUsers.map(async (ldapUser) => {
+                    const userInDB = await userModel.findOne({ username: ldapUser.username });
+                    return {
+                        ...ldapUser,
+                        specificApplications: userInDB ? userInDB.specificApplications : [],
+                    };
+                })
+            );
+
+            // Adiciona os usuários ao objeto categorizado por grupo
+            usersByGroup[groupName] = usersWithApps;
         }
 
         res.json({ username, groups: formattedGroups, usersByGroup });
