@@ -4,6 +4,7 @@ import cors from 'cors';
 import userRoutes from './routes/userRoutes.js';
 import appsRoutes from './routes/appsRoutes.js';
 import ldapRoutes from './routes/ldapRoutes.js'; // ✅ Importando a nova rota LDAP
+import chamadosObrasRoutes from './routes/chamadosObrasRoutes.js'
 import { connectDB } from './config/db.js';
 import passport from 'passport';
 import LdapStrategy from 'passport-ldapauth';
@@ -21,8 +22,10 @@ app.use(cors());
 // Rotas da aplicação geral
 app.use('/api/users', userRoutes);
 app.use('/api/apps', appsRoutes);
-app.use('/api/ldap', ldapRoutes); // ✅ Adicionando a nova rota LDAP
+app.use('/api/ldap', ldapRoutes);
 
+// Rotas do App ChamadosObraPrefeitura
+app.use('/api/chamados-obra', chamadosObrasRoutes)
 // Rotas do App BIC
 // app.use('/api/bic' ())
 

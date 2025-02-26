@@ -323,12 +323,12 @@ GET http://localhost:3333/api/ldap/users/groups/ronyson.fonseca
 ### Definir um programa específico para um usuário Coordenador
 
 POST http://localhost:3333/api/apps/install
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YmNkMDQ3NGU4OWQ5ZTI1ODNkYmZkYiIsIm5hbWUiOiJJYWdvIiwiZW1haWwiOiJ2c2lhZ28yNEBnbWFpbC5jb20iLCJyb2xlIjoiTWFzdGVyIiwiaWF0IjoxNzQwNDI3MzM2LCJleHAiOjE3NDEwMzIxMzZ9.M4w6xPQ1ZwCrB9gnf9gAoyNfmz1Md-4u-7m-fs27ZWY
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YmY0ZGI1ZjE4NzEwM2Y5NDYzMWFlOCIsIm5hbWUiOiJJYWdvIiwiZW1haWwiOiJ2c2lhZ28yNEBnbWFpbC5jb20iLCJyb2xlIjoiTWFzdGVyIiwiaWF0IjoxNzQwNTkwNTE3LCJleHAiOjE3NDExOTUzMTd9.DQqBFBNqSIJHRaLQmjFNvL2l7UhE5uevjdtbNpbFKd8
 Content-Type: application/json
 
 {
-  "username": "iago.vieira",
-  "apps": ["Chamados Obra"]
+  "username": "tiago.almeida",
+  "apps": ["Chamados Obra", "BIC"]
 }
 
 ### Definir um programa específico para um Técnico BIC
@@ -350,4 +350,13 @@ Content-Type: application/json
 {
   "username": "iago.vieira",
   "apps": ["BIC"]
+}
+
+### 
+
+POST https://3833-45-169-84-2.ngrok-free.app/api/chamados-obra/create
+Content-Type: application/json
+
+{
+  "hello": "World"
 }
